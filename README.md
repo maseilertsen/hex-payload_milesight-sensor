@@ -21,3 +21,11 @@ CHANNEL | ID   | TYPE | LENGTH |                   DESCRIPTION                  
 Current | 0x04 | 0x98 |   2    | Current(2B) current, unit: A , read: uint16/100 |
 +-------+------+---------------+-------------------------------------------------+
 ```
+
+## Benchmark
+
+Run the benchmark to compare Go and JavaScript decoder performance:
+
+```bash
+./benchmark.sh
+```
