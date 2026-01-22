@@ -54,6 +54,6 @@ func main() {
 	elapsed := time.Since(start)
 
 	fmt.Printf("Ran %d iterations\n", iterations)
-	fmt.Printf("Total time: %v\n", elapsed)
-	fmt.Printf("Average time per iteration: %v\n", elapsed/time.Duration(iterations))
+	fmt.Printf("Total time: %.2fms\n", float64(elapsed.Nanoseconds())/1e6)
+	fmt.Printf("Average time per iteration: %.2fns\n", float64(elapsed.Nanoseconds())/float64(iterations))
 }
