@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"time"
 )
 
 /*
@@ -26,26 +27,33 @@ Current | 0x04 | 0x98 |   2    | Current(2B) current, unit: A , read: uint16/100
 +-------+------+---------------+-------------------------------------------------+
 */
 
+func decodePayloads(list []string) {
+	for _, p := range list {
+		// Decode hex to bytes
+		b, err := hex.DecodeString(p)
+		if err != nil {
+			continue
+		}
+
+		// Bytes 2..4 is the uint16 current (little-endian)
+		raw := binary.LittleEndian.Uint16(b[2:4])
+		_ = float64(raw) / 100.0
+	}
+}
+
 func main() {
 	// Example-data from Milesight sensor ct101
 	list := []string{"FF166746D38802580000", "0498B80B00000000"}
 
-	for _, p := range list {
-		fmt.Println("Payload in:", p)
+	const iterations = 1000000
 
-		// Decode hex to bytes
-		b, err := hex.DecodeString(p)
-		if err != nil {
-			fmt.Println("Decode error:", err)
-			continue
-		}
-		fmt.Println("decoded hex:", b) // Debug print
-
-		// Bytes 2..4 is the uint16 current (little-endian)
-		raw := binary.LittleEndian.Uint16(b[2:4])
-		currentA := float64(raw) / 100.0
-
-		fmt.Printf("Current raw: %d\n", raw)
-		fmt.Printf("Current A: %.2f\n\n", currentA)
+	start := time.Now()
+	for i := 0; i < iterations; i++ {
+		decodePayloads(list)
 	}
+	elapsed := time.Since(start)
+
+	fmt.Printf("Ran %d iterations\n", iterations)
+	fmt.Printf("Total time: %.2fms\n", float64(elapsed.Nanoseconds())/1e6)
+	fmt.Printf("Average time per iteration: %.2fns\n", float64(elapsed.Nanoseconds())/float64(iterations))
 }
