@@ -1,16 +1,4 @@
-// Timer test for ct101 decoder - similar to main.go benchmark
-
-// Import the decoder (need to load the file since it uses var declarations)
-const fs = await import('fs');
-const vm = await import('vm');
-
-// Load and execute the decoder script to get the functions
-const decoderCode = fs.readFileSync('./ct101_decoder.js', 'utf8');
-const context = { Object, Array, Math, TypeError, Error };
-vm.createContext(context);
-vm.runInContext(decoderCode, context);
-
-const { milesightDeviceDecode } = context;
+// Timer test for ct101 decoder - minimal version matching main.go
 
 // Helper to convert hex string to byte array
 function hexToBytes(hex) {
@@ -21,18 +9,25 @@ function hexToBytes(hex) {
     return bytes;
 }
 
+// Read uint16 little-endian (same as Go's binary.LittleEndian.Uint16)
+function readUInt16LE(bytes, offset) {
+    return (bytes[offset + 1] << 8) + bytes[offset];
+}
+
 // Example data from Milesight sensor ct101 (same as main.go)
 const payloads = [
     "FF166746D38802580000",
     "0498B80B00000000"
 ];
 
-// Convert hex strings to byte arrays
-const byteArrays = payloads.map(hexToBytes);
-
 function decodePayloads() {
-    for (const bytes of byteArrays) {
-        milesightDeviceDecode(bytes);
+    for (const p of payloads) {
+        // Decode hex to bytes
+        const b = hexToBytes(p);
+
+        // Bytes 2..4 is the uint16 current (little-endian)
+        const raw = readUInt16LE(b, 2);
+        const _ = raw / 100.0;
     }
 }
 
